@@ -96,11 +96,14 @@ class AutoClassBot {
       }] : []
     };
 
+    this.log(`🛰️ Attempting to send email via ${this.emailConfig.sender}...`);
+
     try {
-      await transporter.sendMail(mailOptions);
-      this.log(`📧 Notification email sent to ${this.emailConfig.recipient}`);
+      const info = await transporter.sendMail(mailOptions);
+      this.log(`📧 Email sent! Response: ${info.response}`);
     } catch (error) {
-      this.log(`Failed to send email: ${error.message}`, 'error');
+      this.log(`❌ SMTP Error: ${error.message}`, 'error');
+      console.error('Full SMTP Error:', error);
     }
   }
 
