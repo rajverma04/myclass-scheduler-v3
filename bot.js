@@ -65,8 +65,11 @@ class AutoClassBot {
     }
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: this.emailConfig.sender, pass: this.emailConfig.pass }
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user: this.emailConfig.sender, pass: this.emailConfig.pass },
+      connectionTimeout: 15000
     });
 
     // Content varies by action
@@ -117,8 +120,11 @@ class AutoClassBot {
     }
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: this.emailConfig.sender, pass: this.emailConfig.pass }
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user: this.emailConfig.sender, pass: this.emailConfig.pass },
+      connectionTimeout: 15000
     });
 
     const rows = timetable.map(c => `
