@@ -133,6 +133,17 @@ app.post('/api/trigger', async (req, res) => {
   res.json({ success: true, message: 'Sync complete and V3 timers updated.' });
 });
 
+// Send Test Email
+app.post('/api/test-email', async (req, res) => {
+  bot.log('🧪 Sending a test email...');
+  try {
+    await bot.sendNotificationEmail('Test Class', '12:00 PM', 'TEST');
+    res.json({ success: true, message: 'Test email sent. Check your inbox.' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // ========== Cron Schedulers ==========
 
 // 1. Morning Sync (Every day at 8:00 AM IST)
