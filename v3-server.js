@@ -23,17 +23,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 let botEnabled = true;
 
 /**
- * Morning Sync Logic
+ * Daily Sync Logic
+ * @param {boolean} shouldEmail - Whether to send the daily briefing email
  */
-async function morningSync() {
+async function syncSchedule(shouldEmail = true) {
   if (!botEnabled || !credentials.regNumber || !credentials.password) return;
-  bot.log('🌅 Syncing today\'s schedule (Modular V3)...');
+  bot.log(`🌅 Syncing today's schedule (Email: ${shouldEmail ? 'ON' : 'OFF'})...`);
   try {
     const result = await bot.checkAndJoin(credentials.regNumber, credentials.password, true);
-    await bot.emailService.sendDailyBriefing(bot.dailyTimetable);
+    
+    // Only send email if requested (not on server startup)
+    if (shouldEmail && bot.dailyTimetable.length > 0) {
+      try {
+        await bot.emailService.sendDailyBriefing(bot.dailyTimetable);
+      } catch (err) {
+        bot.log(`⚠️ Briefing email skipped due to connection issue, but schedule is loaded.`, 'warn');
+      }
+    }
+    
     if (bot.dailyTimetable.length > 0) setupClassTimers(bot.dailyTimetable);
   } catch (e) {
-    bot.log(`❌ Morning Sync Failed: ${e.message}`, 'error');
+    bot.log(`❌ Sync Failed: ${e.message}`, 'error');
   }
 }
 
@@ -101,9 +111,9 @@ app.get('/api/stream', (req, res) => {
 });
 
 app.get('/api/screenshot', (req, res) => {
-  res.json({ 
-    image: bot.latestScreenshot, 
-    url: bot.latestScreenshotUrl 
+  res.json({
+    image: bot.latestScreenshot,
+    url: bot.latestScreenshotUrl
   });
 });
 
@@ -122,9 +132,10 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.listen(PORT, () => {
   console.log(`🚀 Modular Bot V3 Dashboard: http://localhost:${PORT}`);
-  if (credentials.regNumber && credentials.password) morningSync();
+  // Perform a SILENT sync on startup to populate the dashboard UI
+  syncSchedule(false); 
 });
 
-// Cron hooks
-schedule.scheduleJob({ hour: 11, minute: 0, tz: 'Asia/Kolkata' }, morningSync);
-schedule.scheduleJob({ hour: 17, minute: 0, tz: 'Asia/Kolkata' }, morningSync);
+// Cron hooks - Updated to match your 11 AM / 5 PM preference
+schedule.scheduleJob({ hour: 11, minute: 0, tz: 'Asia/Kolkata' }, () => syncSchedule(true));
+schedule.scheduleJob({ hour: 17, minute: 0, tz: 'Asia/Kolkata' }, () => syncSchedule(true));

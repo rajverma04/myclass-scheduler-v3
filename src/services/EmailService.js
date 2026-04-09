@@ -14,6 +14,10 @@ class EmailService {
       port: 587,
       secure: false,
       requireTLS: true,
+      pool: true,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 30000,
       auth: {
         user: this.config.login,
         pass: this.config.pass
