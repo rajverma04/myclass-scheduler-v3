@@ -15,7 +15,7 @@ class EmailService {
     }
 
     const data = {
-      sender: { name: "CodeNexus Bot", email: this.config.sender },
+      sender: { name: "Autoclass Bot", email: this.config.sender },
       to: [{ email: to, name: to }],
       subject: subject,
       htmlContent: html
