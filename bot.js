@@ -56,7 +56,40 @@ class AutoClassBot {
   }
 
   /**
+   * Internal helper to create a production-ready SMTP transporter.
+   * Standardizes settings for Cloud Platforms like Render.
+   * @private
+   */
+  _getTransporter() {
+    // 1. Validate environment variables
+    if (!this.emailConfig.sender || !this.emailConfig.pass) {
+      this.log('❌ SMTP Error: SENDER_EMAIL or SENDER_PASS environment variables are missing!', 'error');
+      return null;
+    }
+
+    /**
+     * PRODUCTION CONFIGURATION:
+     * Using explicit host/port instead of service shortcut for better stability.
+     * Port 587 is standard for modern SMTP with STARTTLS.
+     */
+    return nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // Use STARTTLS (standard for port 587)
+      auth: {
+        user: this.emailConfig.sender,
+        pass: this.emailConfig.pass
+      },
+      // Give the cloud server plenty of time to connect
+      connectionTimeout: 20000, // 20 seconds
+      greetingTimeout: 20000,
+      socketTimeout: 30000
+    });
+  }
+
+  /**
    * Send Email Notification with optional Screenshot
+   * Used for class join verification and updates.
    */
   async sendNotificationEmail(className, time, action = 'JOINED', screenshotBuffer = null) {
     if (!this.emailConfig.recipient || !this.emailConfig.sender || !this.emailConfig.pass) {
@@ -99,14 +132,18 @@ class AutoClassBot {
       }] : []
     };
 
-    this.log(`🛰️ Attempting to send email via ${this.emailConfig.sender}...`);
+    this.log(`🛰️ Attempting to send ${isVerification ? 'verification' : action} email to ${this.emailConfig.recipient}...`);
 
     try {
+      // 2. Perform the send action
       const info = await transporter.sendMail(mailOptions);
-      this.log(`📧 Email sent! Response: ${info.response}`);
+      this.log(`📧 Email sent successfully! ID: ${info.messageId}`);
     } catch (error) {
-      this.log(`❌ SMTP Error: ${error.message}`, 'error');
-      console.error('Full SMTP Error:', error);
+      this.log(`❌ SMTP Production Error: ${error.message}`, 'error');
+      // Helpful troubleshooting hint for the user
+      if (error.message.includes('Greeting never received')) {
+        this.log('💡 TIP: Render might be blocking Port 587. Try switching to Port 465 in bot.js if this persists.', 'info');
+      }
     }
   }
 
@@ -177,10 +214,10 @@ class AutoClassBot {
     };
 
     try {
-      await transporter.sendMail(mailOptions);
-      this.log(`📧 Daily briefing email sent to ${this.emailConfig.recipient}`);
+      const info = await transporter.sendMail(mailOptions);
+      this.log(`📧 Daily briefing sent! ID: ${info.messageId}`);
     } catch (error) {
-      this.log(`Failed to send briefing email: ${error.message}`, 'error');
+      this.log(`❌ SMTP Briefing Error: ${error.message}`, 'error');
     }
   }
 
