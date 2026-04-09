@@ -119,8 +119,12 @@ app.get('/api/screenshot', (req, res) => {
 
 app.post('/api/test-email', async (req, res) => {
   try {
-    await bot.emailService.sendNotification('Test Class', '12:00 PM', 'TEST');
-    res.json({ success: true });
+    const sampleClasses = [
+      { name: 'CSES009-Lecture', time: '09:00 AM - 11:00 AM', status: 'SCHEDULED' },
+      { name: 'MTH101-Tutorial', time: '02:00 PM - 03:00 PM', status: 'SCHEDULED' }
+    ];
+    await bot.emailService.sendDailyBriefing(sampleClasses);
+    res.json({ success: true, message: 'Test Briefing sent successfully!' });
   } catch (e) {
     res.status(500).json({ success: false, error: e.message });
   }

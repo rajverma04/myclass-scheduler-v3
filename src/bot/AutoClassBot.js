@@ -31,9 +31,8 @@ class AutoClassBot {
     this.scraperService = new ScraperService(this);
     this.emailService = new EmailService({
       recipient: (process.env.NOTIFICATION_EMAIL || '').trim(),
-      sender: (process.env.SENDER_EMAIL || '').trim(),
-      pass: (process.env.BREVO_API || '').trim(),
-      login: (process.env.BREVO_LOGIN || '').trim()
+      sender: (process.env.EMAIL_USER || process.env.SENDER_EMAIL || '').trim(),
+      pass: (process.env.BREVO_API_KEY || process.env.BREVO_API || '').trim()
     }, this);
   }
 
