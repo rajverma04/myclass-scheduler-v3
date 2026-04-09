@@ -74,8 +74,8 @@ class AutoClassBot {
      */
     return nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // Use STARTTLS (standard for port 587)
+      port: 465,
+      secure: true, // Use SSL/TLS (standard for port 465)
       auth: {
         user: this.emailConfig.sender,
         pass: this.emailConfig.pass
