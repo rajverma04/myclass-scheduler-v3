@@ -5,10 +5,8 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server.js",
-    "v2": "node v2-server.js",
-    "v3": "node v3-server.js",
-    "dev": "node server.js"
+    "start": "node v3-server.js",
+    "v3": "node v3-server.js"
   },
   "dependencies": {
     "dotenv": "^17.4.1",
